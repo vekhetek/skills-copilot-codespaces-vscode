@@ -1,33 +1,68 @@
-// create web server 
-// use express 
+// create web server using express
 const express = require('express');
 const router = express.Router();
-// use comment model 
-const Comment = require('../models/comment');
-// create new comment 
-router.post('/new', (req, res) => {
-    const newComment = new Comment({
-        comment: req.body.comment,
-        user: req.body.user,
-        post: req.body.post
-    });
-    newComment.save().then(comment => res.json(comment)).catch(err => console.log(err));
-});
-// get all comments 
+// import comments model
+const comments = require('../models/comments');
+
+// GET: /comments
 router.get('/', (req, res) => {
-    Comment.find().then(comments => res.json(comments)).catch(err => console.log(err));
+  // res.send('GET: /comments');
+  comments.find()
+    .then((data) => {
+      console.log('Data: ', data);
+      res.json(data);
+    })
+    .catch((error) => {
+      console.log('Error: ', error);
+    });
 });
-// get comment by id 
-router.get('/:id', (req, res) => {
-    Comment.findById(req.params.id).then(comment => res.json(comment)).catch(err => console.log(err));
+
+// POST: /comments
+router.post('/', (req, res) => {
+  console.log('Body: ', req.body);
+  const data = req.body;
+  const newComments = new comments(data);
+  // save data
+  newComments.save((error) => {
+    if (error) {
+      res.status(500).json({ msg: 'Sorry, internal server errors' });
+    } else {
+      // res.send('Data has been saved!');
+      res.json({
+        msg: 'Your data has been saved!!'
+      });
+    }
+  });
 });
-// update comment 
+
+// PUT: /comments
 router.put('/:id', (req, res) => {
-    Comment.findByIdAndUpdate(req.params.id, req.body, { new: true }).then(comment => res.json(comment)).catch(err => console.log(err));
+  console.log('Body: ', req.body);
+  const data = req.body;
+  comments.findByIdAndUpdate(req.params.id, data, (error) => {
+    if (error) {
+      res.status(500).json({ msg: 'Sorry, internal server errors' });
+    } else {
+      // res.send('Data has been updated!');
+      res.json({
+        msg: 'Your data has been updated!!'
+      });
+    }
+  });
 });
-// delete comment 
+
+// DELETE: /comments
 router.delete('/:id', (req, res) => {
-    Comment.findByIdAndDelete(req.params.id).then(comment => res.json(comment)).catch(err => console.log(err));
+  comments.findByIdAndDelete(req.params.id, (error) => {
+    if (error) {
+      res.status(500).json({ msg: 'Sorry, internal server errors' });
+    } else {
+      // res.send('Data has been deleted!');
+      res.json({
+        msg: 'Your data has been deleted!!'
+      });
+    }
+  });
 });
-// export 
+
 module.exports = router;
